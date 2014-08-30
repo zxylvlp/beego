@@ -195,6 +195,28 @@ func (output *BeegoOutput) Json(data interface{}, hasIndent bool, coding bool) e
 	return nil
 }
 
+// Json writes json to response body.
+// if coding is true, it converts utf-8 to \u0000 type.
+func (output *BeegoOutput) JsonWithHtmlType(data interface{}, hasIndent bool, coding bool) error {
+	output.Header("Content-Type", "text/html; charset=UTF-8")
+	var content []byte
+	var err error
+	if hasIndent {
+		content, err = json.MarshalIndent(data, "", "  ")
+	} else {
+		content, err = json.Marshal(data)
+	}
+	if err != nil {
+		http.Error(output.Context.ResponseWriter, err.Error(), http.StatusInternalServerError)
+		return err
+	}
+	if coding {
+		content = []byte(stringsToJson(string(content)))
+	}
+	output.Body(content)
+	return nil
+}
+
 // Jsonp writes jsonp to response body.
 func (output *BeegoOutput) Jsonp(data interface{}, hasIndent bool) error {
 	output.Header("Content-Type", "application/javascript;charset=UTF-8")

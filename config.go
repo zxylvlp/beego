@@ -150,7 +150,7 @@ func init() {
 	TemplateLeft = "{{"
 	TemplateRight = "}}"
 
-	BeegoServerName = "beegoServer:" + VERSION
+	BeegoServerName = "ZhaoXingYu"
 
 	EnableAdmin = false
 	AdminHttpAddr = "127.0.0.1"

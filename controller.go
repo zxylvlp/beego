@@ -13,6 +13,9 @@ package beego
 import (
 	"bytes"
 	"errors"
+	"github.com/astaxie/beego/context"
+	"github.com/astaxie/beego/session"
+	"github.com/astaxie/beego/utils"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -23,10 +26,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-
-	"github.com/astaxie/beego/context"
-	"github.com/astaxie/beego/session"
-	"github.com/astaxie/beego/utils"
 )
 
 //commonly used mime-types
@@ -305,6 +304,21 @@ func (c *Controller) ServeJson(encoding ...bool) {
 		hasencoding = true
 	}
 	c.Ctx.Output.Json(c.Data["json"], hasIndent, hasencoding)
+}
+
+// ServeJson sends a json response with encoding charset.
+func (c *Controller) ServeJsonWithHtmlType(encoding ...bool) {
+	var hasIndent bool
+	var hasencoding bool
+	if RunMode == "prod" {
+		hasIndent = false
+	} else {
+		hasIndent = true
+	}
+	if len(encoding) > 0 && encoding[0] == true {
+		hasencoding = true
+	}
+	c.Ctx.Output.JsonWithHtmlType(c.Data["json"], hasIndent, hasencoding)
 }
 
 // ServeJsonp sends a jsonp response.
