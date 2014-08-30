@@ -1,12 +1,16 @@
-// Beego (http://beego.me/)
-
-// @description beego is an open-source, high-performance web framework for the Go programming language.
-
-// @link        http://github.com/astaxie/beego for the canonical source repository
-
-// @license     http://github.com/astaxie/beego/blob/master/LICENSE
-
-// @authors     astaxie
+// Copyright 2014 beego Author. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package beego
 
@@ -66,7 +70,9 @@ func parserPkg(pkgRealpath, pkgpath string) error {
 			for _, d := range fl.Decls {
 				switch specDecl := d.(type) {
 				case *ast.FuncDecl:
-					parserComments(specDecl.Doc, specDecl.Name.String(), fmt.Sprint(specDecl.Recv.List[0].Type.(*ast.StarExpr).X), pkgpath)
+					if specDecl.Recv != nil {
+						parserComments(specDecl.Doc, specDecl.Name.String(), fmt.Sprint(specDecl.Recv.List[0].Type.(*ast.StarExpr).X), pkgpath)
+					}
 				}
 			}
 		}
@@ -115,7 +121,7 @@ func parserComments(comments *ast.CommentGroup, funcName, controllerName, pkgpat
 }
 
 func genRouterCode() {
-	os.Mkdir(path.Join(AppPath, "routers"), 0755)
+	os.Mkdir(path.Join(workPath, "routers"), 0755)
 	Info("generate router from comments")
 	var globalinfo string
 	for k, cList := range genInfoList {
@@ -149,7 +155,7 @@ func genRouterCode() {
 		}
 	}
 	if globalinfo != "" {
-		f, err := os.Create(path.Join(AppPath, "routers", "commentsRouter.go"))
+		f, err := os.Create(path.Join(workPath, "routers", "commentsRouter.go"))
 		if err != nil {
 			panic(err)
 		}
@@ -159,8 +165,11 @@ func genRouterCode() {
 }
 
 func compareFile(pkgRealpath string) bool {
-	if utils.FileExists(path.Join(AppPath, lastupdateFilename)) {
-		content, err := ioutil.ReadFile(path.Join(AppPath, lastupdateFilename))
+	if !utils.FileExists(path.Join(workPath, "routers", "commentsRouter.go")) {
+		return true
+	}
+	if utils.FileExists(path.Join(workPath, lastupdateFilename)) {
+		content, err := ioutil.ReadFile(path.Join(workPath, lastupdateFilename))
 		if err != nil {
 			return true
 		}
@@ -188,7 +197,7 @@ func savetoFile(pkgRealpath string) {
 	if err != nil {
 		return
 	}
-	ioutil.WriteFile(path.Join(AppPath, lastupdateFilename), d, os.ModePerm)
+	ioutil.WriteFile(path.Join(workPath, lastupdateFilename), d, os.ModePerm)
 }
 
 func getpathTime(pkgRealpath string) (lastupdate int64, err error) {

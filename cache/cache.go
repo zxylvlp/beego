@@ -1,13 +1,33 @@
-// Beego (http://beego.me/)
+// Copyright 2014 beego Author. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-// @description beego is an open-source, high-performance web framework for the Go programming language.
-
-// @link        http://github.com/astaxie/beego for the canonical source repository
-
-// @license     http://github.com/astaxie/beego/blob/master/LICENSE
-
-// @authors     astaxie
-
+// Usage:
+//
+// import(
+//   "github.com/astaxie/beego/cache"
+// )
+//
+// bm, err := cache.NewCache("memory", `{"interval":60}`)
+//
+// Use it like this:
+//
+//	bm.Put("astaxie", 1, 10)
+//	bm.Get("astaxie")
+//	bm.IsExist("astaxie")
+//	bm.Delete("astaxie")
+//
+//  more docs http://beego.me/docs/module/cache.md
 package cache
 
 import (
@@ -17,7 +37,7 @@ import (
 // Cache interface contains all behaviors for cache adapter.
 // usage:
 //	cache.Register("file",cache.NewFileCache()) // this operation is run in init method of file.go.
-//	c := cache.NewCache("file","{....}")
+//	c,err := cache.NewCache("file","{....}")
 //	c.Put("key",value,3600)
 //	v := c.Get("key")
 //
@@ -52,7 +72,7 @@ func Register(name string, adapter Cache) {
 	if adapter == nil {
 		panic("cache: Register adapter is nil")
 	}
-	if _, dup := adapters[name]; dup {
+	if _, ok := adapters[name]; ok {
 		panic("cache: Register called twice for adapter " + name)
 	}
 	adapters[name] = adapter
@@ -61,14 +81,15 @@ func Register(name string, adapter Cache) {
 // Create a new cache driver by adapter name and config string.
 // config need to be correct JSON as string: {"interval":360}.
 // it will start gc automatically.
-func NewCache(adapterName, config string) (Cache, error) {
+func NewCache(adapterName, config string) (adapter Cache, e error) {
 	adapter, ok := adapters[adapterName]
 	if !ok {
-		return nil, fmt.Errorf("cache: unknown adapter name %q (forgot to import?)", adapterName)
+		e = fmt.Errorf("cache: unknown adapter name %q (forgot to import?)", adapterName)
+		return
 	}
 	err := adapter.StartAndGC(config)
 	if err != nil {
-		return nil, err
+		adapter = nil
 	}
-	return adapter, nil
+	return
 }
