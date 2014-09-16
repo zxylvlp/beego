@@ -19,7 +19,6 @@ import (
 	"errors"
 	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/session"
-	"github.com/astaxie/beego/utils"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -30,12 +29,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-<<<<<<< HEAD
-=======
-
-	"github.com/astaxie/beego/context"
-	"github.com/astaxie/beego/session"
->>>>>>> 7f977a0c8ccdbc21e84f928046cb8778f24a67e0
 )
 
 //commonly used mime-types
